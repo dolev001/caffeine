@@ -52,6 +52,7 @@ import com.github.benmanes.caffeine.cache.simulator.policy.sketch.RandomWindowTi
 import com.github.benmanes.caffeine.cache.simulator.policy.sketch.S4WindowTinyLfuPolicy;
 import com.github.benmanes.caffeine.cache.simulator.policy.sketch.SimpleWindowTinyLfuPolicy;
 import com.github.benmanes.caffeine.cache.simulator.policy.sketch.WindowTinyLfuPolicy;
+import com.github.benmanes.caffeine.cache.simulator.policy.sketch.tinycache.KwayCacheGeneral;
 import com.github.benmanes.caffeine.cache.simulator.policy.sketch.tinycache.TinyCachePolicy;
 import com.github.benmanes.caffeine.cache.simulator.policy.sketch.tinycache.TinyCacheWithGhostCachePolicy;
 import com.github.benmanes.caffeine.cache.simulator.policy.sketch.tinycache.WindowTinyCachePolicy;
@@ -135,6 +136,10 @@ public final class Registry {
     factories.put("sketch.tinycache", TinyCachePolicy::policies);
     factories.put("sketch.windowtinycache", WindowTinyCachePolicy::policies);
     factories.put("sketch.tinycache_ghostcache", TinyCacheWithGhostCachePolicy::policies);
+    Stream.of(KwayCacheGeneral.EvictionPolicy.values()).forEach(priority -> {
+        String id = "kway." + priority.name().toLowerCase();
+        factories.put(id, config -> KwayCacheGeneral.policies(config, priority));
+      });
   }
 
   private static void registerIRR(Map<String, Function<Config, Set<Policy>>> factories) {
