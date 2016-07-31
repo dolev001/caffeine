@@ -111,8 +111,22 @@ public final class LinkedPolicy implements Policy {
 
   /** The replacement policy. */
   public enum EvictionPolicy {
+	  
+	    /** Evicts entries based on how frequently they are used  dolev . */ 
+//	    LFU {
+//	      @Override void onAccess(Node node, PolicyStats policyStats) {
+//	        policyStats.recordOperation();
+//	        node.frequency++;
+//	        // do nothing
+//	      }
+//	      @Override Node findVictim(Node sentinel, PolicyStats policyStats) {
+//	        policyStats.recordOperation();
+//	       // return sentinel.next;
+//	      }
+//	    },
+	    
 
-    /** Evicts entries based on insertion order. */
+    /** Evicts entries based on insertion order. */ 
     FIFO {
       @Override void onAccess(Node node, PolicyStats policyStats) {
         policyStats.recordOperation();
@@ -191,6 +205,7 @@ public final class LinkedPolicy implements Policy {
     private Node prev;
     private Node next;
     private long key;
+    private int frequency;
 
     /** Creates a new sentinel node. */
     public Node() {
@@ -198,12 +213,14 @@ public final class LinkedPolicy implements Policy {
       this.sentinel = this;
       this.prev = this;
       this.next = this;
+      this.frequency=1;
     }
 
     /** Creates a new, unlinked node. */
     public Node(long key, Node sentinel) {
       this.sentinel = sentinel;
       this.key = key;
+      this.frequency=1;
     }
 
     /** Appends the node to the tail of the list. */

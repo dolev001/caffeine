@@ -33,16 +33,16 @@ public final class KwayCacheGeneral implements Policy {
 	private final Random rnd;
 
 	private final Ticker ticker;
-	private final Admittor admittor;
 	private final PolicyStats policyStats;
+	private final Admittor admittor;
 	private final EvictionPolicy policy;
 	// private final Sample sampleStrategy;
 	private final Node[] cache;
 
 	public KwayCacheGeneral(Admission admission, EvictionPolicy policy, Config config) {
-		KwaySettings settings = new KwaySettings(config);
 		this.policyStats = new PolicyStats(admission.format("kway." + policy.label()));
 		this.admittor = admission.from(config, policyStats);
+		KwaySettings settings = new KwaySettings(config);
 		this.policy = policy;
 		this.ticker = new CountTicker();
 		this.ways = settings.kwayWays();
@@ -112,9 +112,10 @@ public final class KwayCacheGeneral implements Policy {
 		// else do nothing - keep old
 		return true;
 	}
-
+	@Override
 	public void record(long key) {
 		  admittor.record(key);
+	      policyStats.recordOperation();
 		if (contains(key)) {
 			policyStats.recordHit();
 		} else {
@@ -140,6 +141,7 @@ public final class KwayCacheGeneral implements Policy {
 			this.accessTime = tick;
 			this.index = index;
 			this.key = key;
+			this.frequency=1;
 		}
 
 		@Override
