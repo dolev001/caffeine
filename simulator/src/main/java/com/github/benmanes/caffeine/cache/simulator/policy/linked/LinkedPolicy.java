@@ -19,6 +19,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -113,17 +114,33 @@ public final class LinkedPolicy implements Policy {
   public enum EvictionPolicy {
 	  
 	    /** Evicts entries based on how frequently they are used  dolev . */ 
-//	    LFU {
-//	      @Override void onAccess(Node node, PolicyStats policyStats) {
-//	        policyStats.recordOperation();
-//	        node.frequency++;
-//	        // do nothing
-//	      }
-//	      @Override Node findVictim(Node sentinel, PolicyStats policyStats) {
-//	        policyStats.recordOperation();
-//	       // return sentinel.next;
-//	      }
-//	    },
+	    doLFU {
+	      @Override void onAccess(Node node, PolicyStats policyStats) {
+	        policyStats.recordOperation();
+	        node.frequency++;
+	      }
+	      @Override Node findVictim(Node sentinel, PolicyStats policyStats) {
+	        policyStats.recordOperation();
+//	        for (Map.Entry<Long,Node> entry : data.entrySet())
+//	        {
+//	            System.out.println(entry.getKey() + "/" + entry.getValue());
+//	        }
+            Node min = sentinel.next;
+            Node node = sentinel.next;
+
+	     while ( node !=sentinel.prev )
+	     {
+	    	 if (node.frequency<min.frequency)
+	    	 {
+	    		 min=node;
+	    	 }
+	    	 node=node.next; 
+	     }
+	            
+	        
+	        return min;
+	      }
+	    },
 	    
 
     /** Evicts entries based on insertion order. */ 

@@ -28,8 +28,8 @@ import com.typesafe.config.Config;
 @SuppressWarnings("PMD.AvoidDollarSigns")
 public final class KwayCacheGeneral implements Policy {
 	private final HashFunctionParser hashFunc;
-	private final int ways; // k length
-	private final int numberOfSets; // width
+	private final int ways; // k  --> 
+	private final int numberOfSets; //
 	private final Random rnd;
 
 	private final Ticker ticker;
@@ -74,7 +74,9 @@ public final class KwayCacheGeneral implements Policy {
 		for (int i = 0; i < ways; i++) {
 			if (cache[offset + i] != null)
 			{
-				if (cache[offset + i].key == hashFunc.fpaux.value) 
+				// change Key!!!
+				//if (cache[offset + i].key == hashFunc.fpaux.value) 
+				if (cache[offset + i].key == item) 
 				{
 					cache[offset + i].accessTime = now;
 					cache[offset + i].frequency++;
@@ -94,7 +96,10 @@ public final class KwayCacheGeneral implements Policy {
 		long now = ticker.read();
 		for (int i = 0; i < ways; i++) {
 			if (cache[offset + i] == null) {
-				Node node = new Node(hashFunc.fpaux.value, i, now);
+				// change Key!!!
+				//Node node = new Node(hashFunc.fpaux.value, i, now);
+				Node node = new Node(item, i, now);
+
 				cache[offset + i] = node;
 				return false;
 			}
@@ -102,10 +107,16 @@ public final class KwayCacheGeneral implements Policy {
 		// replace an old item with the new one
 
 		Node victim = policy.select(cache, offset, ways, rnd);
-		if (admittor.admit(hashFunc.fpaux.value, victim.key)) {
+		//if (admittor.admit(hashFunc.fpaux.value, victim.key)) {
+		if (admittor.admit(item, victim.key)) {
+
 			// if the candidate should be added and the victim removed due to eviction
 			// add new ,remove old
-			Node node = new Node(hashFunc.fpaux.value, victim.index, now);
+			
+			// change Key!!!
+			//Node node = new Node(hashFunc.fpaux.value, victim.index, now);
+			Node node = new Node(item, victim.index, now);
+
 			cache[offset + victim.index] = node;
 			
 		}

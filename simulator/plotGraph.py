@@ -35,29 +35,34 @@ with open("simulatorResForGraph.csv") as csvfile:
 	countRow=0	
 	ax = plt.subplot(111)
 	colormap = plt.cm.gist_ncar
-	numOfColors=len(ways) +1
+	numOfColors=len(ways) +3
 	colors = [colormap(i) for i in np.linspace(0.1, 0.9, numOfColors)]
 	filled_markers = ('o', 'v','*','s','d', '<', '>', '8', 'h', 'p','^','H', 'D')
 	
 	for policy in policies:
 		headerPolicyNmae=policy.split('.')[1]
 		headerCacheName= policy.split('.')[0]
-		if headerCacheName=='kway':
+		if headerCacheName=='kway': #or policy =='linked.Dolfu' or  policy =='linked.Dolfu_TinyLfu':
 			csvfile.seek(0)
 			countRow=0
-			color=1
+			color=2
 			#reader = csv.reader(csvfile)
 			plt.figure()
 			for row in reader:
-				if row[0]!='cache.Size' and countRow>2:
+				if row[0]!='cache.Size' and row[0]!='ways'and row[0]!='policies': #and countRow>2:
 					cachename= row[0].split('.')[0]
 					policyname= row[0].split('.')[1]
-					if policyname==headerPolicyNmae:
+					if policyname==headerPolicyNmae or (headerPolicyNmae=='Lfu'and policyname=='Dolfu')or (headerPolicyNmae=='Lfu_TinyLfu'and policyname=='Dolfu_TinyLfu'):
 						if cachename=='kway':
 							plt.plot(cacheSize,row[2:] , linewidth=2.5, linestyle="-", marker= filled_markers[color],color=colors[color], label=row[1] )
 							color+=1
-						else:
-							plt.plot(cacheSize,row[2:] , linewidth=2.5, linestyle="--",marker= filled_markers[0],color=colors[0], label='FA'  )
+						if cachename=='linked':
+							if policyname=='Dolfu' or policyname=='Dolfu_TinyLfu':
+								plt.plot(cacheSize,row[2:] , linewidth=2.5, linestyle="--",marker= 'D',color=colors[numOfColors-1], label=policyname+' linked'  )
+							else:
+								plt.plot(cacheSize,row[2:] , linewidth=2.5, linestyle="--",marker= filled_markers[0],color=colors[0], label=policyname+' linked'  )
+						if cachename=='FA':
+							plt.plot(cacheSize,row[2:] , linewidth=2.5, linestyle="--",marker= filled_markers[1],color=colors[1], label='FA'  )
 						
 						#print("count ",countRow ," polict ", policyname) 
 				countRow+=1	

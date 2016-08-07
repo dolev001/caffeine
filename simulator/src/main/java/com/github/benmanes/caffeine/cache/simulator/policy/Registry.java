@@ -102,7 +102,6 @@ public final class Registry {
       String id = "linked." + priority.name().toLowerCase();
       factories.put(id, config -> LinkedPolicy.policies(config, priority));
     });
-    // this is the LRU 
     Stream.of(FrequentlyUsedPolicy.EvictionPolicy.values()).forEach(priority -> {
       String id = "linked." + priority.name().toLowerCase();
       factories.put(id, config -> FrequentlyUsedPolicy.policies(config, priority));
