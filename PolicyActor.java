@@ -43,15 +43,17 @@ public final class PolicyActor extends UntypedActor
   private ExecutorService executor;
   
   // number of threads 
-  private  Integer n=5;
+  private  Integer numberOfTeads;
   
   public PolicyActor(Policy policy) {
     this.policy = requireNonNull(policy);
     
-    
+   
     Config config=  getContext().system().settings().config().getConfig("caffeine.simulator");
   ConcurrentSettings settings = new ConcurrentSettings(config);
-   n= settings.threads();
+  numberOfTeads = settings.threads();
+  System.out.println( numberOfTeads);
+   executor =  Executors.newFixedThreadPool(numberOfTeads);
     
   }
 
@@ -74,7 +76,6 @@ public final class PolicyActor extends UntypedActor
   private void process(LongArrayList events) {
 	  
 	
-	    executor =  Executors.newFixedThreadPool(n);
 	  
     policy.stats().stopwatch().start();
     try {
@@ -95,35 +96,26 @@ public final class PolicyActor extends UntypedActor
        
       }
    // policy.record(events.getLong(i)); // old
-    
-      try {
-    	   // System.out.println("attempt to shutdown executor");
-    	    executor.shutdown();
-    	    executor.awaitTermination(5, TimeUnit.MINUTES);
-    	}
-    	catch (InterruptedException e) {
-    		 context().system().log().error("tasks interrupted");
-    		 //System.out.println("tasks interrupted");
-    	}
-    	finally {
-    	    if (!executor.isTerminated()) {
-    	         context().system().log().error("cancel non-finished tasks"); 
-    	         
-    	        
-    	    }
-    	    executor.shutdownNow(); 
-    	  //  System.out.println("shutdown finished");
-    	}
-      
-      
-      
+          
     } catch (Exception e) {
       context().system().log().error(e, "");
       getSender().tell(Message.ERROR, ActorRef.noSender());
     } finally {
       policy.stats().stopwatch().stop();
+     // stop(executor);
     }
   }
+  
+// severe performance penalty for using finalizers
+  /*  @Override
+ protected void finalize() throws Throwable {
+	   System.out.println("In finalize block");
+	  stop(executor); 
+      super.finalize();
+  }
+  */
+  
+ 
   
  
   static final class ConcurrentSettings extends BasicSettings {
@@ -135,6 +127,27 @@ public final class PolicyActor extends UntypedActor
 	    }  
 	  } 
   
+  
+  private void stop(ExecutorService executor) {
+      try {
+          System.out.println("attempt to shutdown executor");
+          executor.shutdown();
+          executor.awaitTermination(5, TimeUnit.SECONDS);
+      }
+      catch (InterruptedException e) {
+    		 context().system().log().error("tasks interrupted");
+          System.err.println("termination interrupted");
+      }
+      finally {
+          if (!executor.isTerminated()) {
+              System.err.println("killing non-finished tasks");
+          }
+          executor.shutdownNow();
+          System.out.println("shutdown finished");
+      }
+  }
+  
+ 
   
   
 }
